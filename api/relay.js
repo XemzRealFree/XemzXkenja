@@ -24,8 +24,8 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Invalid plan selected." });
   }
 
-  const DOMAIN = process.env.DOMAIN || "belum";
-  const APIKEY = process.env.APIKEY || "belum";
+  const DOMAIN = process.env.DOMAIN || "https://kenja-ganteng.kenjaapublik.my.id";
+  const APIKEY = process.env.APIKEY || "ptla_RKC13A19K8mEKJrJidUtlKyFZrkh1dkTqCGymPvxM5Z";
 
   try {
     // ✅ CREATE USER
