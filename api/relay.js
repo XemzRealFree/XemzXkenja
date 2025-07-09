@@ -1,88 +1,97 @@
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   const { username, plan } = req.body;
 
+  if (!username || !plan) {
+    return res.status(400).json({ error: 'Missing username or plan' });
+  }
+
   const planSpecs = {
     "1gb": { ram: 1000, disk: 1000, cpu: 40 },
     "2gb": { ram: 2000, disk: 2000, cpu: 60 },
-    "3gb": { ram: 3000, disk: 3000, cpu: 80 },
-    "4gb": { ram: 4000, disk: 4000, cpu: 100 },
-    "unlimited": { ram: 0, disk: 0, cpu: 0 }
+    "unlimited": { ram: 0, disk: 0, cpu: 0 },
   };
 
   const specs = planSpecs[plan];
   if (!specs) {
-    return res.status(400).json({ error: "Invalid plan selected." });
+    return res.status(400).json({ error: 'Invalid plan' });
   }
 
-  const DOMAIN = process.env.DOMAIN || "https://kenja-ganteng.kenjaapublik.my.id";
-  const APIKEY = process.env.APIKEY || "ptla_RKC13A19K8mEKJrJidUtlKyFZrkh1dkTqCGymPvxM5Z";
+  // ✅ V2 CONFIG
+  const PTERO_DOMAIN = "https://kenja-ganteng.kenjaapublik.my.id"; // Ganti domain kamu
+  const API_KEY = "ptla_RKC13A19K8mEKJrJidUtlKyFZrkh1dkTqCGymPvxM5Z";  // API Key kamu
+  const USER_ID = 1;  // User ID di Ptero
+  const eggV2 = "15";  // Egg ID
+  const nestidV2 = "5";  // Nest ID
+  const locV2 = "1";   // Location ID
+  const ALLOCATION_ID = 1; // Allocation ID
+
+  const payload = {
+    name: username,
+    user: USER_ID,
+    egg: eggV2,
+    nest: nestidV2,
+    docker_image: "ghcr.io/pterodactyl/yolks:nodejs_18", // contoh Node.js Yolk
+    startup: "npm run start", // contoh startup script
+    environment: {
+      // ENV bisa beda sesuai egg
+      NODE_VERSION: "18",
+      AUTO_UPDATE: "1",
+    },
+    limits: {
+      memory: specs.ram,
+      swap: 0,
+      disk: specs.disk,
+      io: 500,
+      cpu: specs.cpu
+    },
+    feature_limits: {
+      databases: 1,
+      allocations: 1
+    },
+    allocation: {
+      default: ALLOCATION_ID
+    },
+    deploy: {
+      locations: [locV2],
+      dedicated_ip: false,
+      port_range: []
+    }
+  };
 
   try {
-    const userRes = await fetch(`${DOMAIN}/api/application/users`, {
+    const response = await fetch(`${PTERO_DOMAIN}/api/application/servers`, {
       method: 'POST',
       headers: {
+        'Authorization': `Bearer ${API_KEY}`,
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${APIKEY}`
+        'Accept': 'Application/vnd.pterodactyl.v1+json'
       },
-      body: JSON.stringify({
-        email: `${username}@gmail.com`,
-        username,
-        first_name: username,
-        last_name: 'Server',
-        password: `${username}1234`
-      }),
+      body: JSON.stringify(payload)
     });
 
-    const userData = await userRes.json();
-    if (userData.errors) {
-      return res.status(500).json({ error: userData.errors });
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("Ptero API Error:", data);
+      return res.status(500).json({ error: 'Failed to create server', detail: data });
     }
 
-    const usr_id = userData.attributes.id;
-
-    const serverRes = await fetch(`${DOMAIN}/api/application/servers`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${APIKEY}`
-      },
-      body: JSON.stringify({
-        name: `${username} Server`,
-        description: `Auto panel by XemZ`,
-        user: usr_id,
-        egg: 15,
-        docker_image: "ghcr.io/parkervcp/yolks:nodejs_18",
-        startup: "npm start",
-        environment: { CMD_RUN: "npm start" },
-        limits: {
-          memory: specs.ram,
-          disk: specs.disk,
-          cpu: specs.cpu,
-          io: 500,
-          swap: 0
-        },
-        feature_limits: {
-          databases: 5,
-          backups: 5,
-          allocations: 5
-        },
-        deploy: {
-          locations: [1],
-          dedicated_ip: false,
-          port_range: []
-        }
-      }),
+    return res.status(200).json({
+      username: data.attributes.name || username,
+      password: `${username}1234`,
+      domain: "xemz.my.id",
+      ram: specs.ram === 0 ? "Unlimited" : `${specs.ram} MB`,
+      disk: specs.disk === 0 ? "Unlimited" : `${specs.disk} MB`,
+      cpu: specs.cpu === 0 ? "Unlimited" : `${specs.cpu}%`,
+      created: new Date().toLocaleString('id-ID')
     });
-
-    const serverData = await serverRes.json();
-    res.status(200).json(serverData);
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Internal Server Error', details: err.message });
+    return res.status(500).json({ error: 'Internal Server Error', message: err.message });
   }
-}
+      }
