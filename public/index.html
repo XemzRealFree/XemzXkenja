@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>XemZ Panel Creator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    const planSpecs = {
+      "1gb": { ram: 1000, disk: 1000, cpu: 40 },
+      "2gb": { ram: 2000, disk: 2000, cpu: 60 },
+      "3gb": { ram: 3000, disk: 3000, cpu: 80 },
+      "4gb": { ram: 4000, disk: 4000, cpu: 100 },
+      "unlimited": { ram: 0, disk: 0, cpu: 0 }
+    };
+
+    async function createPanel() {
+      const username = document.getElementById('username').value.trim();
+      const plan = document.getElementById('plan').value;
+      const result = document.getElementById('result');
+      const error = document.getElementById('error');
+
+      result.classList.add('hidden');
+      error.classList.add('hidden');
+
+      if (!username) {
+        error.textContent = "Please enter a username.";
+        error.classList.remove('hidden');
+        return;
+      }
+      if (!plan || !planSpecs[plan]) {
+        error.textContent = "Please select a valid plan.";
+        error.classList.remove('hidden');
+        return;
+      }
+
+      result.textContent = "Creating panel...";
+      result.classList.remove('hidden');
+
+      try {
+        const res = await fetch('/api/relay', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, plan })
+        });
+
+        const data = await res.json();
+
+        if (data.errors || data.error) {
+          error.textContent = "Error: " + JSON.stringify(data);
+          error.classList.remove('hidden');
+          result.classList.add('hidden');
+          return;
+        }
+
+        const createdAt = new Date().toLocaleString('id-ID', {
+          timeZone: 'Asia/Jakarta',
+          dateStyle: 'medium',
+          timeStyle: 'short'
+        });
+
+        const specs = planSpecs[plan];
+        const password = `${username}1234`;
+
+        result.textContent = `✅ Panel Created
+
+👤 Username: ${username}
+🔑 Password: ${password}
+🆔 User ID: ${data.attributes?.id || 'N/A'}
+📄 Created at: ${createdAt}
+💾 RAM: ${specs.ram === 0 ? "Unlimited" : specs.ram + " MB"}
+📂 Disk: ${specs.disk === 0 ? "Unlimited" : specs.disk + " MB"}
+⚙️ CPU: ${specs.cpu === 0 ? "Unlimited" : specs.cpu + "%"}
+🌐 Domain: xemz.my.id`;
+
+      } catch (err) {
+        error.textContent = "Error: " + err.message;
+        error.classList.remove('hidden');
+        result.classList.add('hidden');
+      }
+    }
+  </script>
+</head>
+<body class="min-h-screen flex items-center justify-center bg-gray-50">
+  <div class="bg-white p-8 rounded shadow max-w-md w-full">
+    <h1 class="text-2xl font-bold mb-4 text-indigo-700">Kenja Panel </h1>
+    <input id="username" type="text" placeholder="Username"
+      class="w-full border px-3 py-2 rounded mb-4" />
+
+    <select id="plan" class="w-full border px-3 py-2 rounded mb-4">
+      <option value="">-- Select Plan --</option>
+      <option value="1gb">1GB RAM, 1GB Disk, 40% CPU</option>
+      <option value="2gb">2GB RAM, 2GB Disk, 60% CPU</option>
+      <option value="3gb">3GB RAM, 3GB Disk, 80% CPU</option>
+      <option value="4gb">4GB RAM, 4GB Disk, 100% CPU</option>
+      <option value="unlimited">Unlimited RAM, Disk, CPU</option>
+    </select>
+
+    <button onclick="createPanel()"
+      class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">Create Panel</button>
+
+    <pre id="result" class="mt-4 bg-green-50 p-4 rounded text-sm hidden whitespace-pre-wrap"></pre>
+    <div id="error" class="mt-4 bg-red-100 p-4 rounded text-sm text-red-700 hidden"></div>
+  </div>
+</body>
+</html>
