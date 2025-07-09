@@ -4,29 +4,58 @@
 <meta charset=UTF-8>
 <title>XemZ Panel Creator</title>
 <script src=https://cdn.tailwindcss.com></script>
-<script>const planSpecs={"1gb":{ram:1e3,disk:1e3,cpu:40},"2gb":{ram:2e3,disk:2e3,cpu:60},"3gb":{ram:3e3,disk:3e3,cpu:80},"4gb":{ram:4e3,disk:4e3,cpu:100},"5gb":{ram:5e3,disk:5e3,cpu:120},"6gb":{ram:6e3,disk:6e3,cpu:140},"7gb":{ram:7e3,disk:7e3,cpu:160},"8gb":{ram:8e3,disk:8e3,cpu:180},"9gb":{ram:9e3,disk:9e3,cpu:200},"10gb":{ram:1e4,disk:1e4,cpu:220},unlimited:{ram:0,disk:0,cpu:0}};async function createPanel(){const e=document.getElementById("username").value.trim(),t=document.getElementById("plan").value,n=document.getElementById("result"),a=document.getElementById("error");if(n.classList.add("hidden"),a.classList.add("hidden"),!e)return a.textContent="Please enter a username.",void a.classList.remove("hidden");if(!t||!planSpecs[t])return a.textContent="Please select a valid plan.",void a.classList.remove("hidden");n.textContent="Creating panel...",n.classList.remove("hidden");try{const s=await fetch("/api/relay",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:e,plan:t})}),i=await s.json();if(i.errors||i.error)return a.textContent="Error: "+JSON.stringify(i),a.classList.remove("hidden"),void n.classList.add("hidden");const d=(new Date).toLocaleString("id-ID",{timeZone:"Asia/Jakarta",dateStyle:"medium",timeStyle:"short"}),r=planSpecs[t],m=`${e}1234`;n.textContent=`✅ Panel Created\n\n👤 Username: ${e}\n🔑 Password: ${m}\n🆔 User ID: ${i.attributes?.id||"N/A"}\n📄 Created at: ${d}\n💾 RAM: ${0===r.ram?"Unlimited":r.ram+" MB"}\n📂 Disk: ${0===r.disk?"Unlimited":r.disk+" MB"}\n⚙️ CPU: ${0===r.cpu?"Unlimited":r.cpu+"%"}\n🌐 Domain: xemz.my.id`}catch(e){a.textContent="Error: "+e.message,a.classList.remove("hidden"),n.classList.add("hidden")}}</script>
+<style>body,html{height:100%;overflow:hidden}body{background:#000}</style>
 </head>
-<body class="min-h-screen flex items-center justify-center bg-gray-50">
-<div class="bg-white p-8 rounded shadow max-w-md w-full">
-<h1 class="text-2xl font-bold mb-4 text-indigo-700">XemZ Panel Creator</h1>
-<input id=username placeholder=Username class="w-full border px-3 py-2 rounded mb-4">
-<select id=plan class="w-full border px-3 py-2 rounded mb-4">
-<option value="">-- Select Plan --</option>
-<option value=1gb>1GB RAM, 1GB Disk, 40% CPU</option>
-<option value=2gb>2GB RAM, 2GB Disk, 60% CPU</option>
-<option value=3gb>3GB RAM, 3GB Disk, 80% CPU</option>
-<option value=4gb>4GB RAM, 4GB Disk, 100% CPU</option>
-<option value=5gb>5GB RAM, 5GB Disk, 120% CPU</option>
-<option value=6gb>6GB RAM, 6GB Disk, 140% CPU</option>
-<option value=7gb>7GB RAM, 7GB Disk, 160% CPU</option>
-<option value=8gb>8GB RAM, 8GB Disk, 180% CPU</option>
-<option value=9gb>9GB RAM, 9GB Disk, 200% CPU</option>
-<option value=10gb>10GB RAM, 10GB Disk, 220% CPU</option>
-<option value=unlimited>Unlimited RAM, Disk, CPU</option>
-</select>
-<button onclick=createPanel() class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">Create Panel</button>
-<pre id=result class="mt-4 bg-green-50 p-4 rounded text-sm hidden whitespace-pre-wrap"></pre>
-<div id=error class="mt-4 bg-red-100 p-4 rounded text-sm text-red-700 hidden"></div>
+<body class="text-white relative">
+<div id=container class="h-[200vh] w-full transition-transform duration-700 ease-in-out">
+<section id=lockscreen class="h-screen flex flex-col justify-center items-center bg-cover bg-center relative" style="background-image:url('https://files.catbox.moe/at0m19.jpg')">
+<div id=time class="text-7xl font-extrabold tracking-widest mb-2 text-white"></div>
+<div id=date class="text-lg text-white"></div>
+<div class="absolute bottom-6 w-20 h-1 rounded-full bg-white/70"></div>
+
+</section>
+<section id=home class="h-screen relative flex flex-col items-center justify-start bg-cover bg-center" style="background-image:url('https://files.catbox.moe/gi5hi4.jpg')">
+<div id=time-home class="mt-16 text-7xl font-bold tracking-widest text-white"></div>
+<div class="grid grid-cols-4 gap-4 mt-16 px-4">
+<button onclick='openApp("app1")' class="w-16 h-16 rounded-xl overflow-hidden flex items-center justify-center">
+<img src=https://files.catbox.moe/qbktsj.jpg alt="App 1" class="w-full h-full object-cover">
+</button>
+<button onclick='openApp("app2")' class="w-16 h-16 rounded-xl overflow-hidden flex items-center justify-center">
+<img src=https://source.unsplash.com/100x100?settings alt="App 2" class="w-full h-full object-cover">
+</button>
 </div>
+<div class="absolute bottom-6 w-20 h-1 rounded-full bg-white/70"></div>
+</section>
+</div>
+<div id=app1 class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-green-500 to-emerald-700 hidden p-8 overflow-y-auto">
+<div class="w-full max-w-md flex flex-col justify-center bg-white/10 backdrop-blur-xl p-8 border border-white/20 shadow-2xl">
+<h1 class="text-2xl font-bold mb-6">🚀 Create Panel</h1>
+<input id=username placeholder=Username class="w-full mb-4 px-4 py-3 rounded-lg bg-white/20 text-white placeholder-white/70 backdrop-blur">
+<select id=plan class="w-full mb-6 px-4 py-3 rounded-lg bg-white/20 text-white backdrop-blur">
+<option value="">-- Pilih Plan --</option>
+<option value=1gb>1GB</option>
+<option value=2gb>2GB</option>
+<option value=unlimited>Unlimited</option>
+</select>
+<button onclick=createPanel() class="w-full py-3 rounded-full bg-gradient-to-r from-green-400 to-emerald-600 text-white font-semibold">
+Create Panel
+</button>
+<pre id=result class="mt-6 bg-white/20 p-4 rounded-xl text-white text-sm hidden whitespace-pre-wrap"></pre>
+<div id=error class="mt-4 bg-red-500/30 p-4 rounded-xl text-red-100 text-sm hidden"></div>
+</div>
+<div onclick='closeApp("app1")' class="absolute bottom-6 w-20 h-1 rounded-full bg-white/70 cursor-pointer"></div>
+</div>
+<div id=app2 class="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-purple-700 to-purple-900 hidden p-8 overflow-y-auto">
+<div class="bg-white/10 backdrop-blur-xl p-6 rounded-2xl shadow-2xl w-full max-w-md border border-white/20">
+<h1 class="text-xl font-bold mb-4">⚙️ Settings</h1>
+<p class="mb-4 text-white">Contoh App 2.</p>
+<input placeholder="Contoh input" class="w-full mb-4 px-4 py-3 rounded-lg bg-white/20 text-white placeholder-white/70 backdrop-blur">
+<button class="w-full py-3 rounded-full bg-gradient-to-r from-purple-400 to-purple-600 text-white font-semibold">
+Save
+</button>
+</div>
+<div onclick='closeApp("app2")' class="absolute bottom-6 w-20 h-1 rounded-full bg-white/70 cursor-pointer"></div>
+</div>
+<script>function updateClock(){const e=new Date,t=e.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}),n=e.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});document.getElementById("time").textContent=t,document.getElementById("time-home").textContent=t,document.getElementById("date").textContent=n}updateClock(),setInterval(updateClock,1e3);let startY=0;function goToSlide(e){document.getElementById("container").style.transform=`translateY(-${100*e}vh)`}function openApp(e){document.getElementById(e).classList.remove("hidden")}function closeApp(e){document.getElementById(e).classList.add("hidden")}async function createPanel(){const e=document.getElementById("username").value.trim(),t=document.getElementById("plan").value,n=document.getElementById("result"),d=document.getElementById("error");if(n.classList.add("hidden"),d.classList.add("hidden"),!e||!t)return d.textContent="Please enter username & plan.",void d.classList.remove("hidden");n.textContent="Creating panel...",n.classList.remove("hidden");try{const o=await fetch("/api/relay.js",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:e,plan:t})}),a=await o.json();a.error?(d.textContent="Error: "+a.error,d.classList.remove("hidden"),n.classList.add("hidden")):n.textContent=`✅ Panel Created\n\n👤 Username: ${a.username}\n🔑 Password: ${a.password}\n🌐 Domain: ${a.domain}\n💾 RAM: ${a.ram}\n📂 Disk: ${a.disk}\n⚙️ CPU: ${a.cpu}\n📄 Created: ${a.created}`}catch(e){d.textContent="Error: "+e.message,d.classList.remove("hidden"),n.classList.add("hidden")}}document.getElementById("lockscreen").addEventListener("touchstart",(e=>{startY=e.touches[0].clientY})),document.getElementById("lockscreen").addEventListener("touchend",(e=>{let t=e.changedTouches[0].clientY;startY-t>50&&goToSlide(1)}))</script>
 </body>
 </html>
