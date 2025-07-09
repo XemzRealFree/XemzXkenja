@@ -27,6 +27,9 @@ export default async function handler(req, res) {
   const DOMAIN = process.env.DOMAIN || "https://kenja-ganteng.kenjaapublik.my.id";
   const APIKEY = process.env.APIKEY || "ptla_RKC13A19K8mEKJrJidUtlKyFZrkh1dkTqCGymPvxM5Z";
 
+  // ✅ Buat password: username + random nomor 6 digit
+  const randomPw = `${username}${Math.floor(100000 + Math.random() * 900000)}`;
+
   try {
     // ✅ CREATE USER
     const userRes = await fetch(`${DOMAIN}/api/application/users`, {
@@ -40,7 +43,7 @@ export default async function handler(req, res) {
         username,
         first_name: username,
         last_name: 'Server',
-        password: `${username}1234`
+        password: randomPw
       }),
     });
 
@@ -89,15 +92,13 @@ export default async function handler(req, res) {
     });
 
     const serverData = await serverRes.json();
-
     if (serverData.errors) {
       return res.status(500).json({ error: serverData.errors });
     }
 
-    // ✅ Balikin hasil yang udah DIPETAKAN
     return res.status(200).json({
       username: userData.attributes.username,
-      password: `${username}1234`,
+      password: randomPw, // 🔑 password = username + random nomor
       domain: DOMAIN,
       server_name: serverData.attributes.name,
       ram: specs.ram === 0 ? "Unlimited" : `${specs.ram} MB`,
