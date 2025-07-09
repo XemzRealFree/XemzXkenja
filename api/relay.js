@@ -7,9 +7,15 @@ export default async function handler(req, res) {
 
   const planSpecs = {
     "1gb": { ram: 1000, disk: 1000, cpu: 40 },
-    "2gb": { ram: 2000, disk: 2000, cpu: 60 },
-    "3gb": { ram: 3000, disk: 3000, cpu: 80 },
-    "4gb": { ram: 4000, disk: 4000, cpu: 100 },
+    "2gb": { ram: 2000, disk: 2000, cpu: 50 },
+    "3gb": { ram: 3000, disk: 3000, cpu: 60 },
+    "4gb": { ram: 4000, disk: 4000, cpu: 70 },
+    "5gb": { ram: 5000, disk: 5000, cpu: 80 },
+    "6gb": { ram: 6000, disk: 6000, cpu: 90 },
+    "7gb": { ram: 7000, disk: 7000, cpu: 100 },
+    "8gb": { ram: 8000, disk: 8000, cpu: 110 },
+    "9gb": { ram: 9000, disk: 9000, cpu: 120 },
+    "10gb": { ram: 10000, disk: 10000, cpu: 130 },
     "unlimited": { ram: 0, disk: 0, cpu: 0 }
   };
 
